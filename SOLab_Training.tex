@@ -1,0 +1,72 @@
+%!TEX encoding = UTF-8 Unicode
+\documentclass[12pt]{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{CJKutf8}
+\usepackage[margin=1in]{geometry}
+
+\title{SOLab Training : \\Ten-Bar Truss Optimization}
+\author{r12522620, Su Hsuan }
+\date{August 2023}
+
+\begin{document}
+\begin{CJK}{UTF8}{bsmi}
+
+\maketitle
+
+
+
+\section{題目說明}
+在以下已知條件下，給定桿件截面半徑並求各桿件之位移、應力與反作用力：\\
+(1)所有桿件截面皆為圓型且整體架構處在靜力平衡之情況\\
+(2)材料為鋼，楊氏係數200GPa、密度7860kg/$m^{3}$、降伏強度250MPa\\
+(3)平行與鉛直之桿件(桿1至桿6)長度皆為9.14m\\
+(4)桿件半徑最佳化範圍為0.001m至0.5m間\\
+(5)節點2和節點4上之負載為1.0x$10^7$N\\
+\\
+\begin{center}
+\includegraphics[scale=0.5]{truss}\\
+\includegraphics[scale=0.5]{sol}
+\end{center}
+
+
+\section{程式解說}
+    \subsection{有限元素法}
+        目的:計算各桿件之位移、應力與反作用力
+        \subsubsection{剛性矩陣}
+            定義節點編號及座標、定義各桿件之連接點編號及自由度、定義桿件長度、截面積、楊氏模數等參數。利用公式計算各桿件之剛性模型並整合成12x12之整體剛性矩陣K。
+            \includegraphics[scale=0.5]{K}
+        \subsubsection{計算位移}
+            依題目條件建立負載矩陣F，將無位移節點之行向量與列向量消除以簡化矩陣，並利用F=KQ計算位移矩陣Q。\\
+            \includegraphics[scale=0.5]{Q}
+		 \subsubsection{計算應力}
+            利用應力與應變之關係、應變之定義以及節點在各方向上之位移以三角函數轉換後得到的公式來計算應力。\\\includegraphics[scale=0.5]{stress}
+        \subsubsection{計算反作用力}反作用力在固定端產生，取剛性矩陣K中第9至第12列，乘上位移矩陣後可得到反作用力。\\\includegraphics[scale=0.5]{R}
+        
+        
+    
+    \subsection{fmincon}
+        目的:利用fmincon進行最佳化
+        \subsubsection{建立主程式main.m}
+            執行此程式可輸出最佳解x、最佳目標函數值fval及收斂情形exitflag。\\\includegraphics[scale=0.5]{main}
+        \subsubsection{建立副程式obj.m}
+            將目標函數寫於此。\\\includegraphics[scale=0.5]{obj}
+        \subsubsection{建立副程式nonlcon.m}
+            將拘束條件寫於此。\\\includegraphics[scale=0.5]{nonlcon}
+            
+            
+            
+\section{輸出}
+	\subsection{有限元素法分析的output}
+	\includegraphics[scale=0.4]{stress_Q}\\
+	\subsection{最佳化結果}
+	最佳截面半徑結果為x1=0.3,x2=0.2663\\
+	最佳目標函數值fval為212410\\
+	exitflag為收斂情形\\
+	\includegraphics[scale=0.5]{Results}
+
+
+
+\end{CJK}
+\end{document}
+
+
